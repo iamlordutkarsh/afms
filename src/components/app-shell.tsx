@@ -8,6 +8,7 @@ import { ROLE_LABELS, type Role } from "@/lib/constants";
 const ADMIN_LINKS = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/members", label: "Members" },
+  { href: "/admin/id-cards", label: "ID Cards" },
   { href: "/admin/requests", label: "Requests" },
   { href: "/admin/income", label: "Income" },
   { href: "/admin/expenses", label: "Expenses" },
