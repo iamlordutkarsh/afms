@@ -26,7 +26,7 @@ export default async function AdminDashboardPage() {
     prisma.transaction.aggregate({ _sum: { amount: true }, where: { type: "INCOME" } }),
     prisma.transaction.aggregate({ _sum: { amount: true }, where: { type: "EXPENSE" } }),
     prisma.due.aggregate({ _sum: { amount: true }, where: { status: { in: ["PENDING", "OVERDUE"] } } }),
-    prisma.transaction.findMany({ include: { category: true }, orderBy: { date: "desc" }, take: 1000 }),
+    prisma.transaction.findMany({ include: { category: true, member: true }, orderBy: { date: "desc" }, take: 1000 }),
   ]);
 
   const income = incomeAgg._sum.amount ?? 0;
@@ -48,6 +48,10 @@ export default async function AdminDashboardPage() {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 6);
+
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const monthIncome = txns.filter((t) => t.type === "INCOME" && t.date >= monthStart).reduce((s, t) => s + t.amount, 0);
+  const monthExpense = txns.filter((t) => t.type === "EXPENSE" && t.date >= monthStart).reduce((s, t) => s + t.amount, 0);
 
   const kpis = [
     { label: "Total Income", value: formatINR(income), className: "text-emerald-600" },
@@ -88,6 +92,48 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <CategoryPie data={categoryData} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">This Month</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Income</span>
+              <span className="font-medium text-emerald-600">{formatINR(monthIncome)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Expenses</span>
+              <span className="font-medium text-rose-600">{formatINR(monthExpense)}</span>
+            </div>
+            <div className="flex justify-between text-sm border-t pt-2">
+              <span className="font-medium">Net</span>
+              <span className="font-bold">{formatINR(monthIncome - monthExpense)}</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {txns.slice(0, 8).map((t) => (
+                <div key={t.id} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {t.member?.name ?? "—"} · {t.category?.name ?? "—"}
+                  </span>
+                  <span className={t.type === "INCOME" ? "text-emerald-600 font-medium" : "text-rose-600 font-medium"}>
+                    {t.type === "INCOME" ? "+" : "−"}{formatINR(t.amount)}
+                  </span>
+                </div>
+              ))}
+              {txns.length === 0 && <p className="text-sm text-muted-foreground">No transactions yet.</p>}
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -5,12 +5,13 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@/lib/constants";
 
-// NOTE: for a LAN/HTTP deployment (no HTTPS), you may need to set
-// `useSecureCookies: false` here so login persists. Defaults are fine for localhost dev.
+// NOTE: for a LAN/HTTP deployment (no HTTPS), useSecureCookies is false so login
+// persists over plain HTTP. If you put the app behind HTTPS (Caddy/nginx), set to true.
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   secret: process.env.NEXTAUTH_SECRET,
+  useSecureCookies: false,
   providers: [
     CredentialsProvider({
       name: "Credentials",
