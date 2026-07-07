@@ -1,0 +1,130 @@
+// Association Fund Management System — Prisma schema (SQLite)
+// Note: SQLite has no enums — role/type/status/method are String,
+// enforced via TS unions in src/lib/constants.ts and zod in src/lib/validation.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // "file:./dev.db" → resolves to prisma/dev.db
+}
+
+// Role: SUPER_ADMIN | TREASURER | SECRETARY | MEMBER
+model Member {
+  id           String   @id @default(cuid())
+  email        String   @unique // store lowercase
+  phone        String   @unique
+  passwordHash String
+  role         String   @default("MEMBER")
+  name         String
+  address      String?
+  isActive     Boolean  @default(true)
+  joinedAt     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  transactions Transaction[] @relation("MemberTransactions")
+  recorded     Transaction[] @relation("TransactionRecorder")
+  dues         Due[]
+  auditLogs    AuditLog[]
+}
+
+// type: INCOME | EXPENSE
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  transactions Transaction[]
+  dues         Due[]
+
+  @@unique([name, type])
+}
+
+// type: INCOME | EXPENSE   method: CASH | UPI | BANK_TRANSFER | CHEQUE
+model Transaction {
+  id     String   @id @default(cuid())
+  type   String
+  amount Float
+  date   DateTime @default(now())
+  method String?
+  utrNo  String?
+  note   String?
+
+  memberId String?
+  member   Member? @relation("MemberTransactions", fields: [memberId], references: [id])
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  dueId String? @unique
+  due   Due? @relation("DueSettlement", fields: [dueId], references: [id])
+
+  billUrl   String?
+  receiptNo String? @unique
+
+  createdById String
+  createdBy   Member @relation("TransactionRecorder", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type, date])
+  @@index([memberId])
+  @@index([categoryId])
+}
+
+// status: PENDING | PAID | OVERDUE | WAIVED
+model Due {
+  id      String    @id @default(cuid())
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  amount  Float
+  period  String // "2026-07"
+  dueDate DateTime
+  status  String    @default("PENDING")
+  paidAt  DateTime?
+
+  transaction   Transaction? @relation("DueSettlement")
+
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([memberId, period, categoryId])
+  @@index([memberId, status])
+  @@index([period])
+  @@index([status, dueDate])
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+// action: CREATE | UPDATE | DELETE | LOGIN | EXPORT   entity: Member | Transaction | Due | Setting | Category
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      Member?  @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  before    String?
+  after     String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
