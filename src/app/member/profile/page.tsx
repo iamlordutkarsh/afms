@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "./profile-form";
+import { ChangePasswordForm } from "./change-password-form";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function MemberProfilePage() {
           address: member.address ?? "",
         }}
       />
+      <ChangePasswordForm />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { requireSuper } from "@/lib/rbac";
 import { memberCreateSchema, memberUpdateSchema, type ActionResult } from "@/lib/validation";
-import { randomPassword, hashPassword } from "@/lib/password";
+import { randomPassword, hashPassword, comparePassword } from "@/lib/password";
 import { logAudit } from "@/lib/audit";
 
 /** Create a member with a random temp password (returned to show once). */
@@ -72,5 +72,30 @@ export async function updateOwnProfile(_prev: unknown, formData: FormData): Prom
   });
   await logAudit({ userId: session.user.id, action: "UPDATE", entity: "Member", entityId: session.user.id, before, after: member });
   revalidatePath("/member/profile");
+  return { ok: true };
+}
+
+/** Member changes their own password (verifies current, sets new). */
+export async function changeOwnPassword(_prev: unknown, formData: FormData): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user) return { ok: false, error: "Not authenticated" };
+  const current = String(formData.get("currentPassword") || "");
+  const next = String(formData.get("newPassword") || "");
+  if (next.length < 6) return { ok: false, error: "New password must be at least 6 characters." };
+  const member = await prisma.member.findUnique({ where: { id: session.user.id } });
+  if (!member) return { ok: false, error: "Account not found." };
+  const valid = await comparePassword(current, member.passwordHash);
+  if (!valid) return { ok: false, error: "Current password is incorrect." };
+  await prisma.member.update({
+    where: { id: session.user.id },
+    data: { passwordHash: await hashPassword(next) },
+  });
+  await logAudit({
+    userId: session.user.id,
+    action: "UPDATE",
+    entity: "Member",
+    entityId: session.user.id,
+    after: { passwordChanged: true },
+  });
   return { ok: true };
 }
