@@ -35,6 +35,11 @@ export const categoryCreateSchema = z.object({
 
 export type ActionResult = { ok: boolean; error?: string; tempPassword?: string; name?: string; receiptNo?: string };
 
+export const notificationSchema = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  message: z.string().trim().min(1, "Message is required"),
+});
+
 export const transactionSchema = z.object({
   type: z.string().refine((v) => v === "INCOME" || v === "EXPENSE", "Invalid type"),
   amount: z.coerce.number().positive("Amount must be a positive number"),

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ROLE_LABELS, type Role } from "@/lib/constants";
+import { NotificationBell } from "@/components/notification-bell";
 
 const ADMIN_LINKS = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -14,6 +15,8 @@ const ADMIN_LINKS = [
   { href: "/admin/expenses", label: "Expenses" },
   { href: "/admin/dues", label: "Dues" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/notifications", label: "Notify" },
+  { href: "/admin/polls", label: "Polls" },
 ];
 
 const MEMBER_LINKS = [
@@ -22,6 +25,7 @@ const MEMBER_LINKS = [
   { href: "/member/payments", label: "Payments" },
   { href: "/member/expenses", label: "Expenses" },
   { href: "/member/reports", label: "Reports" },
+  { href: "/member/polls", label: "Polls" },
   { href: "/member/profile", label: "Profile" },
 ];
 
@@ -61,6 +65,7 @@ export function AppShell({
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-4 text-sm">
+            <NotificationBell />
             <span className="text-muted-foreground hidden sm:inline">
               {name} · {ROLE_LABELS[role]}
             </span>

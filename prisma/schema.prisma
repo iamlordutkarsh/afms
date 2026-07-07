@@ -29,7 +29,11 @@ model Member {
   recorded          Transaction[] @relation("TransactionRecorder")
   dues              Due[]
   auditLogs         AuditLog[]
-  reviewedRequests  RegistrationRequest[]
+  reviewedRequests      RegistrationRequest[]
+  notificationsAuthored Notification[]     @relation("NotificationAuthor")
+  notificationsRead     NotificationRead[] @relation("NotificationReader")
+  pollsAuthored         Poll[]             @relation("PollAuthor")
+  pollVotes             PollVote[]         @relation("PollVoter")
 }
 
 // type: INCOME | EXPENSE
@@ -150,4 +154,62 @@ model RegistrationRequest {
   updatedAt    DateTime  @updatedAt
 
   @@index([status])
+}
+
+model Notification {
+  id          String              @id @default(cuid())
+  title       String
+  message     String
+  createdById String
+  createdBy   Member              @relation("NotificationAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime            @default(now())
+  reads       NotificationRead[]
+
+  @@index([createdAt])
+}
+
+model NotificationRead {
+  id             String       @id @default(cuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           Member       @relation("NotificationReader", fields: [userId], references: [id])
+  readAt         DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+}
+
+model Poll {
+  id          String      @id @default(cuid())
+  question    String
+  isActive    Boolean     @default(true)
+  closesAt    DateTime?
+  createdById String
+  createdBy   Member      @relation("PollAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  options     PollOption[]
+  votes       PollVote[]
+
+  @@index([isActive])
+}
+
+model PollOption {
+  id     String     @id @default(cuid())
+  pollId String
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text   String
+  votes  PollVote[]
+}
+
+model PollVote {
+  id       String     @id @default(cuid())
+  pollId   String
+  poll     Poll       @relation(fields: [pollId], references: [id])
+  optionId String
+  option   PollOption @relation(fields: [optionId], references: [id])
+  userId   String
+  user     Member     @relation("PollVoter", fields: [userId], references: [id])
+  votedAt  DateTime   @default(now())
+
+  @@unique([pollId, userId])
 }
