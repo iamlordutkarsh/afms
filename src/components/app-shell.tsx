@@ -17,6 +17,8 @@ const ADMIN_LINKS = [
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/notifications", label: "Notify" },
   { href: "/admin/polls", label: "Polls" },
+  { href: "/admin/audit-log", label: "Audit" },
+  { href: "/admin/backup", label: "Backup" },
 ];
 
 const MEMBER_LINKS = [
