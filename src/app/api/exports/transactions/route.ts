@@ -11,13 +11,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const isAdmin = ADMIN_ROLES.includes(session.user.role);
+
   const params = new URL(req.url).searchParams;
   const format = params.get("format") === "csv" ? "csv" : "xlsx";
   const type = params.get("type") || undefined;
   const from = params.get("from");
   const to = params.get("to");
   const categoryId = params.get("categoryId") || undefined;
-  const memberId = params.get("memberId") || undefined;
+  const memberId = isAdmin ? (params.get("memberId") || undefined) : session.user.id;
 
   const where: Record<string, unknown> = {};
   if (type) where.type = type;

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { formatINR } from "@/lib/receipts";
+import { ADMIN_ROLES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +17,14 @@ export default async function MemberReportsPage({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const isAdmin = ADMIN_ROLES.includes(session.user.role);
 
   const sp = await searchParams;
   const type = sp.type;
   const where: Record<string, unknown> = {};
   if (type) where.type = type;
+  // Members see their own income + all expenses — not other members' contributions.
+  if (!isAdmin) where.OR = [{ type: "EXPENSE" }, { type: "INCOME", memberId: session.user.id }];
 
   const txns = await prisma.transaction.findMany({
     where,
