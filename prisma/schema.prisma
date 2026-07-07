@@ -25,10 +25,11 @@ model Member {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  transactions Transaction[] @relation("MemberTransactions")
-  recorded     Transaction[] @relation("TransactionRecorder")
-  dues         Due[]
-  auditLogs    AuditLog[]
+  transactions      Transaction[] @relation("MemberTransactions")
+  recorded          Transaction[] @relation("TransactionRecorder")
+  dues              Due[]
+  auditLogs         AuditLog[]
+  reviewedRequests  RegistrationRequest[]
 }
 
 // type: INCOME | EXPENSE
@@ -127,4 +128,25 @@ model AuditLog {
 
   @@index([entity, entityId])
   @@index([createdAt])
+}
+
+// status: PENDING | APPROVED | REJECTED
+model RegistrationRequest {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  phone        String
+  address      String?
+  note         String?
+  status       String    @default("PENDING")
+  assignedRole String?
+
+  reviewedById String?
+  reviewedBy   Member?   @relation(fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
 }

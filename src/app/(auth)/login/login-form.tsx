@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +55,12 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Default admin: <code>admin@anmol.local</code> / <code>ChangeMe@2026</code>
+          </p>
+          <p className="text-xs text-muted-foreground text-center">
+            Need access?{" "}
+            <Link href="/register" className="text-primary hover:underline">
+              Request an account
+            </Link>
           </p>
         </form>
       </CardContent>
