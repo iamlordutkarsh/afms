@@ -7,8 +7,8 @@ import { toCSV } from "@/lib/exports/csv";
 
 export async function GET(req: Request) {
   const session = await auth();
-  if (!session?.user || !ADMIN_ROLES.includes(session.user.role)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const params = new URL(req.url).searchParams;

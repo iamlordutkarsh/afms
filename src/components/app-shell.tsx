@@ -19,6 +19,8 @@ const MEMBER_LINKS = [
   { href: "/member/dashboard", label: "Home" },
   { href: "/member/dues", label: "Dues" },
   { href: "/member/payments", label: "Payments" },
+  { href: "/member/expenses", label: "Expenses" },
+  { href: "/member/reports", label: "Reports" },
   { href: "/member/profile", label: "Profile" },
 ];
 
