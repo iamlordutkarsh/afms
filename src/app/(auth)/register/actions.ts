@@ -29,6 +29,10 @@ export async function createRegistrationRequest(
   if (existingMember)
     return { ok: false, error: "An account with this email already exists. Try logging in." };
 
+  const existingPhone = await prisma.member.findUnique({ where: { phone } });
+  if (existingPhone)
+    return { ok: false, error: "An account with this phone number already exists." };
+
   // Check existing request
   const existingReq = await prisma.registrationRequest.findUnique({ where: { email } });
   if (existingReq) {
