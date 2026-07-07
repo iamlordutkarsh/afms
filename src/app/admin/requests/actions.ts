@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { requireSuper } from "@/lib/rbac";
-import { randomPassword, hashPassword } from "@/lib/password";
 import { logAudit } from "@/lib/audit";
 import type { ActionResult } from "@/lib/validation";
 
@@ -19,14 +18,13 @@ export async function approveRequest(id: string, _prev: unknown, formData: FormD
   const existing = await prisma.member.findUnique({ where: { email: req.email } });
   if (existing) return { ok: false, error: "A member with this email already exists." };
 
-  const tempPassword = randomPassword();
   const member = await prisma.member.create({
     data: {
       email: req.email,
       name: req.name,
       phone: req.phone,
       address: req.address,
-      passwordHash: await hashPassword(tempPassword),
+      passwordHash: req.passwordHash,
       role,
       isActive: true,
     },
@@ -44,7 +42,7 @@ export async function approveRequest(id: string, _prev: unknown, formData: FormD
   });
   revalidatePath("/admin/requests");
   revalidatePath("/admin/members");
-  return { ok: true, tempPassword, name: req.name };
+  return { ok: true, name: req.name };
 }
 
 /** Reject a request (no member created). */

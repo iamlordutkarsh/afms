@@ -23,14 +23,16 @@ export function RequestRow({ request }: { request: RequestData }) {
   const bound = approveRequest.bind(null, request.id);
   const [state, action, pending] = useActionState(bound, { ok: false });
 
-  if (state.ok && state.tempPassword) {
+  if (state.ok) {
     return (
       <Card>
-        <CardContent className="py-4 space-y-3">
+        <CardContent className="py-4 space-y-1">
           <p className="text-sm font-medium text-emerald-600">
-            ✓ {state.name} approved. Share this temp password:
+            ✓ {state.name} approved as a member.
           </p>
-          <code className="block rounded bg-muted px-3 py-2 font-mono">{state.tempPassword}</code>
+          <p className="text-xs text-muted-foreground">
+            They can log in with the email and password they chose at signup.
+          </p>
         </CardContent>
       </Card>
     );

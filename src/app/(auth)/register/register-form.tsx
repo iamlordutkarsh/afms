@@ -59,6 +59,14 @@ export function RegisterForm() {
             <Label htmlFor="note">Note (optional)</Label>
             <Input id="note" name="note" placeholder="Anything the admin should know" />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" name="password" type="password" minLength={6} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Input id="confirmPassword" name="confirmPassword" type="password" minLength={6} required />
+          </div>
           {state.error && <p className="text-sm text-destructive">{state.error}</p>}
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Submitting…" : "Submit request"}

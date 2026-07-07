@@ -138,6 +138,7 @@ model RegistrationRequest {
   phone        String
   address      String?
   note         String?
+  passwordHash String
   status       String    @default("PENDING")
   assignedRole String?
 

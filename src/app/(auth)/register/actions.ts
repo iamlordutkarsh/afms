@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/password";
 
 export async function createRegistrationRequest(
   _prev: unknown,
@@ -11,9 +12,17 @@ export async function createRegistrationRequest(
   const phone = String(formData.get("phone") || "").trim();
   const address = String(formData.get("address") || "").trim();
   const note = String(formData.get("note") || "").trim();
+  const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
 
   if (!name || !email || !phone)
     return { ok: false, error: "Name, email, and phone are required." };
+  if (password.length < 6)
+    return { ok: false, error: "Password must be at least 6 characters." };
+  if (password !== confirmPassword)
+    return { ok: false, error: "Passwords don't match." };
+
+  const passwordHash = await hashPassword(password);
 
   // Block if already a member
   const existingMember = await prisma.member.findUnique({ where: { email } });
@@ -28,13 +37,13 @@ export async function createRegistrationRequest(
     // Re-apply after rejection
     await prisma.registrationRequest.update({
       where: { email },
-      data: { name, phone, address: address || undefined, note: note || undefined, status: "PENDING" },
+      data: { name, phone, address: address || undefined, note: note || undefined, status: "PENDING", passwordHash },
     });
     return { ok: true };
   }
 
   await prisma.registrationRequest.create({
-    data: { name, email, phone, address: address || undefined, note: note || undefined },
+    data: { name, email, phone, address: address || undefined, note: note || undefined, passwordHash },
   });
   return { ok: true };
 }
