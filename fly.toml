@@ -1,0 +1,25 @@
+# Fly.io config for AFMS
+# Change the app name below to something unique (lowercase, hyphens)
+app = "afms-utkarsh"
+primary_region = "bom"
+
+[build]
+
+[env]
+  DATABASE_URL = "file:/data/dev.db"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "afms_data"
+  destination = "/data"
