@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatINR } from "@/lib/receipts";
+import { DeleteTransactionButton } from "@/components/delete-transaction-button";
 import { IncomeRecordForm } from "./record-form";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export default async function IncomePage({
               <th className="p-2 font-medium">Category</th>
               <th className="p-2 font-medium">Method</th>
               <th className="p-2 font-medium text-right">Amount</th>
+              <th className="p-2 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -62,10 +64,11 @@ export default async function IncomePage({
                 <td className="p-2">{t.category?.name ?? "—"}</td>
                 <td className="p-2"><Badge variant="outline">{t.method ?? "—"}</Badge></td>
                 <td className="p-2 text-right font-medium">{formatINR(t.amount)}</td>
+                <td className="p-2 text-right"><DeleteTransactionButton id={t.id} /></td>
               </tr>
             ))}
             {txns.length === 0 && (
-              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No income recorded yet.</td></tr>
+              <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No income recorded yet.</td></tr>
             )}
           </tbody>
         </table>
