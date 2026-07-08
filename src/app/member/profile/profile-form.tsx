@@ -27,7 +27,7 @@ export function ProfileForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" defaultValue={member.phone} required />
+            <Input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9+\-\s]{4,}" title="Numbers only" defaultValue={member.phone} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
