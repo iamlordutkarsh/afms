@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ROLE_LABELS, type Role } from "@/lib/constants";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const ADMIN_LINKS = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -66,7 +67,8 @@ export function AppShell({
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-4 text-sm">
+          <div className="ml-auto flex items-center gap-2 text-sm">
+            <ThemeToggle />
             <NotificationBell />
             <span className="text-muted-foreground hidden sm:inline">
               {name} · {ROLE_LABELS[role]}
