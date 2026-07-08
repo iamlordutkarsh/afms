@@ -3,12 +3,11 @@ set -euo pipefail
 
 # AFMS — One-command Fly.io deployment
 # Usage:  bash deploy-fly.sh
-#
-# Prerequisites: a free Fly.io account (sign up at https://fly.io/app/sign-up)
 
 BOLD="\033[1m"
 GREEN="\033[32m"
 YELLOW="\033[33m"
+RED="\033[31m"
 RESET="\033[0m"
 
 echo -e "${BOLD}🚀 AFMS — Fly.io Deployment${RESET}"
@@ -41,12 +40,20 @@ sed -i.bak "s/^app = .*/app = \"$APP_NAME\"/" fly.toml && rm -f fly.toml.bak
 # ── Create app ──
 echo ""
 echo -e "${BOLD}Step 3:${RESET} Creating app '$APP_NAME'..."
-fly apps create "$APP_NAME" --no-deploy || true
+if fly apps create "$APP_NAME" 2>/dev/null; then
+  echo "  ✓ App created."
+else
+  echo -e "  ${YELLOW}App may already exist — continuing...${RESET}"
+fi
 
 # ── Volume ──
 echo ""
 echo -e "${BOLD}Step 4:${RESET} Creating persistent volume (1GB)..."
-fly volumes create afms_data --size 1 --app "$APP_NAME" || true
+if fly volumes create afms_data --size 1 -a "$APP_NAME" 2>/dev/null; then
+  echo "  ✓ Volume created."
+else
+  echo -e "  ${YELLOW}Volume may already exist — continuing...${RESET}"
+fi
 
 # ── Secrets ──
 echo ""
@@ -58,12 +65,14 @@ fly secrets set \
   NEXTAUTH_URL="https://$APP_NAME.fly.dev" \
   SUPERADMIN_EMAIL="$ADMIN_EMAIL" \
   SUPERADMIN_PASSWORD="$ADMIN_PASSWORD" \
-  --app "$APP_NAME"
+  -a "$APP_NAME"
+
+echo "  ✓ Secrets set."
 
 # ── Deploy ──
 echo ""
 echo -e "${BOLD}Step 6:${RESET} Building + deploying (~2-3 min)..."
-fly deploy --app "$APP_NAME"
+fly deploy -a "$APP_NAME"
 
 # ── Done ──
 echo ""
@@ -77,6 +86,5 @@ echo ""
 echo "   Useful commands:"
 echo "     fly logs -a $APP_NAME        # view logs"
 echo "     fly ssh console -a $APP_NAME # SSH into the machine"
-echo "     fly scale memory 1024 -a $APP_NAME  # upgrade RAM"
 echo "     fly status -a $APP_NAME      # check status"
 echo ""
