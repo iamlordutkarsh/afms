@@ -2,7 +2,6 @@
 set -euo pipefail
 
 # AFMS — One-command Fly.io deployment
-# Usage:  bash deploy-fly.sh
 
 BOLD="\033[1m"
 GREEN="\033[32m"
@@ -24,49 +23,62 @@ fi
 # ── Auth ──
 echo -e "${BOLD}Step 1:${RESET} Sign in to Fly.io"
 if fly auth whoami &>/dev/null; then
-  echo "  Already signed in."
+  echo "  Already signed in as $(fly auth whoami 2>/dev/null)."
 else
   fly auth login
 fi
 
-# ── App name ──
+# ── App name (loop until unique) ──
 echo ""
-echo -e "${BOLD}Step 2:${RESET} Choose a unique app name"
-read -rp "  App name [afms-utkarsh]: " APP_NAME
-APP_NAME="${APP_NAME:-afms-utkarsh}"
-# Update fly.toml
-sed -i.bak "s/^app = .*/app = \"$APP_NAME\"/" fly.toml && rm -f fly.toml.bak
+while true; do
+  echo -e "${BOLD}Step 2:${RESET} Choose a unique app name (lowercase letters, numbers, hyphens)"
+  read -rp "  App name [afms-utkarsh]: " APP_NAME
+  APP_NAME="${APP_NAME:-afms-utkarsh}"
 
-# ── Create app ──
-echo ""
-echo -e "${BOLD}Step 3:${RESET} Creating app '$APP_NAME'..."
-if fly apps create "$APP_NAME" 2>/dev/null; then
-  echo "  ✓ App created."
-else
-  echo -e "  ${YELLOW}App may already exist — continuing...${RESET}"
-fi
+  echo -e "${BOLD}Step 3:${RESET} Creating app '$APP_NAME'..."
+  # Try to create — show errors, don't hide them
+  CREATE_OUTPUT=$(fly apps create "$APP_NAME" 2>&1) && {
+    echo "  ✓ App created."
+    break
+  } || {
+    # Check if it failed because WE already own it (volume exists etc.)
+    if fly info -a "$APP_NAME" &>/dev/null; then
+      echo -e "  ${YELLOW}App already exists in your account — continuing with it.${RESET}"
+      break
+    else
+      echo -e "  ${RED}✗ Name '$APP_NAME' is taken or invalid.${RESET}"
+      echo -e "  ${RED}  Error: $CREATE_OUTPUT${RESET}"
+      echo -e "  ${YELLOW}  Try something more unique (e.g. afms-myorg, funds-app-2024)${RESET}"
+      echo ""
+    fi
+  }
+done
+
+# ── Update fly.toml ──
+sed -i.bak "s/^app = .*/app = \"$APP_NAME\"/" fly.toml && rm -f fly.toml.bak
 
 # ── Volume ──
 echo ""
 echo -e "${BOLD}Step 4:${RESET} Creating persistent volume (1GB)..."
-if fly volumes create afms_data --size 1 -a "$APP_NAME" 2>/dev/null; then
+VOL_OUTPUT=$(fly volumes create afms_data --size 1 -a "$APP_NAME" 2>&1) && {
   echo "  ✓ Volume created."
-else
-  echo -e "  ${YELLOW}Volume may already exist — continuing...${RESET}"
-fi
+} || {
+  echo -e "  ${YELLOW}Volume may already exist: $VOL_OUTPUT${RESET}"
+  echo "  Continuing..."
+}
 
 # ── Secrets ──
 echo ""
 echo -e "${BOLD}Step 5:${RESET} Setting secrets..."
 ADMIN_EMAIL="admin@afms.app"
 ADMIN_PASSWORD="ChangeMe@2026"
+SECRET=$(openssl rand -base64 32)
 fly secrets set \
-  NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
+  NEXTAUTH_SECRET="$SECRET" \
   NEXTAUTH_URL="https://$APP_NAME.fly.dev" \
   SUPERADMIN_EMAIL="$ADMIN_EMAIL" \
   SUPERADMIN_PASSWORD="$ADMIN_PASSWORD" \
   -a "$APP_NAME"
-
 echo "  ✓ Secrets set."
 
 # ── Deploy ──
@@ -82,9 +94,4 @@ echo "   🌐 URL:      https://$APP_NAME.fly.dev"
 echo "   👤 Login:    $ADMIN_EMAIL"
 echo "   🔑 Password: $ADMIN_PASSWORD"
 echo -e "   ${YELLOW}⚠️  Change the admin password in Settings after first login!${RESET}"
-echo ""
-echo "   Useful commands:"
-echo "     fly logs -a $APP_NAME        # view logs"
-echo "     fly ssh console -a $APP_NAME # SSH into the machine"
-echo "     fly status -a $APP_NAME      # check status"
 echo ""
