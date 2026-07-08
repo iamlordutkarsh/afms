@@ -48,7 +48,7 @@ export default async function PollsPage() {
                         <span className="text-muted-foreground">{opt._count.votes} ({pct}%)</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#ff5a1f" }} />
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#f97316" }} />
                       </div>
                     </div>
                   );

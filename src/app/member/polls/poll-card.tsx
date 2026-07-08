@@ -43,7 +43,7 @@ export function PollCard({ poll }: { poll: PollData }) {
                   <span className="text-muted-foreground">{pct}% · {opt.voteCount}</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: "#ff5a1f" }} />
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: "#f97316" }} />
                 </div>
               </div>
             );

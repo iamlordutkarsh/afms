@@ -14,7 +14,7 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#ff5a1f", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6", "#f43f5e"];
+const COLORS = ["#f97316", "#06b6d4", "#fbbf24", "#a78bfa", "#34d399", "#fb7185", "#60a5fa", "#f43f5e"];
 
 export function IncomeExpenseBarChart({
   data,
@@ -29,8 +29,8 @@ export function IncomeExpenseBarChart({
         <YAxis tick={{ fontSize: 12 }} width={64} />
         <Tooltip formatter={(v) => Number(v).toLocaleString("en-IN", { style: "currency", currency: "INR" })} />
         <Legend />
-        <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="expense" name="Expense" fill="#ff5a1f" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="income" name="Income" fill="#f97316" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="expense" name="Expense" fill="#6b7280" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
