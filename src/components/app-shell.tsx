@@ -83,6 +83,19 @@ export function AppShell({
         </div>
       </header>
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
+      <footer className="border-t border-border/60 py-4 px-4 text-center">
+        <p className="text-xs text-muted-foreground">
+          Made with <span className="text-primary">♥</span> by{" "}
+          <a
+            href="https://apkutkarsh.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+          >
+            apkutkarsh
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
