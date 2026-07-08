@@ -16,7 +16,8 @@ ENV NODE_ENV=production
 # Production deps + prisma CLI + tsx
 COPY package*.json ./
 RUN npm ci --omit=dev
-RUN npm install --no-save prisma tsx
+RUN npm install --no-save prisma
+RUN npm install -g tsx
 
 # Copy prisma schema BEFORE running generate
 COPY --from=build /app/prisma ./prisma
