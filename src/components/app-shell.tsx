@@ -46,7 +46,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-background sticky top-0 z-10">
+      <header className="border-b border-border/60 bg-card/80 backdrop-blur-md sticky top-0 z-10 shadow-[0_2px_8px_rgba(16,185,129,0.04)]">
         <div className="mx-auto max-w-7xl px-4 flex h-14 items-center gap-6">
           <Link href={isAdmin ? "/admin/dashboard" : "/member/dashboard"} className="font-semibold tracking-tight">
             AFMS
